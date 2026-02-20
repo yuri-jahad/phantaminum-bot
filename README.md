@@ -1,6 +1,9 @@
 # phantaminum-bot
 
-![TOG](src/assets/img/phantaminum.webp)
+<p align="center">
+  <img src="src/assets/img/phantaminum.webp" width="400">
+</p>
+
 
 **Un outil pour l'exploration de la langue française sur Discord.**
 
