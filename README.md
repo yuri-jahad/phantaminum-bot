@@ -1,7 +1,7 @@
 # phantaminum-bot
 
-<p align="center">
-  <img src="src/assets/img/phantaminum.webp" width="400">
+<p>
+  <img src="src/assets/img/phantaminum.webp" width="400" height="500">
 </p>
 
 
