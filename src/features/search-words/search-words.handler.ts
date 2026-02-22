@@ -1,5 +1,5 @@
 import { words } from '@core/dictionary/dictionary.cache'
-import type { CommandResponse } from '@shared/command-registry/command-registry.type'
+import type { CommandResponse } from '@shared/command/command.type'
 import { searchWordsService } from '@features/search-words/search-words.service'
 
 export function searchWordsHandler (

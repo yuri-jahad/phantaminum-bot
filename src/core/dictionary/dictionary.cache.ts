@@ -3,9 +3,7 @@ import type { DictionaryList } from '@core/dictionary/dictionary.types.js'
 
 class Dictionary {
   private static _instance: Dictionary | null = null
-
   private list: DictionaryList | null = null
-
   private constructor () {}
 
   static get instance (): Dictionary {

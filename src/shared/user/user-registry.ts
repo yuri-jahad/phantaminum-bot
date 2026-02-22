@@ -1,12 +1,12 @@
 import { DataManager, USERS_DATA_PATH } from '@data/data-manager';
-import type { User } from '@shared/user-registry/user-registry.type';
+import type { User } from '@shared/user/user-registry.type';
 
 export class UserRegistry {
   private static instance: UserRegistry | null = null;
   private _users: User[] = [];
   private readonly dataManager = new DataManager();
 
-  private constructor() {}
+  constructor() {}
 
   static getInstance(): UserRegistry {
     if (!UserRegistry.instance) {

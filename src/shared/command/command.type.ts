@@ -31,10 +31,12 @@ export interface CommandConfig {
 }
 
 export interface CommandModel {
-  variants: string[]
-  helper: string
-  config: CommandConfig
-  fn: (args: any) => any
+  default: {
+    variants: string[]
+    helper: string
+    config: CommandConfig
+    fn: (args: any) => any
+  }
 }
 
 

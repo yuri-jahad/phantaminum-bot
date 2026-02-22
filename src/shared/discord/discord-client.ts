@@ -7,7 +7,7 @@ export class DiscordClient {
   private isStarted: boolean = false
   private static instance: DiscordClient | null = null
 
-  private constructor () {}
+  constructor () {}
 
   static getInstance (): DiscordClient {
     if (!DiscordClient.instance) {
