@@ -2,12 +2,10 @@ import { words } from '@core/dictionary/dictionary.cache'
 import type { CommandResponse } from '@shared/command/command.type'
 import { searchWordsService } from '@features/search-words/search-words.service'
 
-export function searchWordsHandler (
-  args: string[]
-): CommandResponse {
-  const pattern = args[0] || ''
-  const rawLimit = args[1] ? parseInt(args[1]) : 10
-  const limit = Math.min(Math.max(rawLimit, 1), 50)
+export function searchWordsHandler (args: string[]): CommandResponse {
+  const pattern = args[1] || ''
+  const rawLimit = args[2] ? parseInt(args[2]) : 10
+  //const limit = Math.min(Math.max(rawLimit, 1), 50)
 
   if (!pattern) {
     return {
@@ -29,7 +27,7 @@ export function searchWordsHandler (
     const { results, total } = searchWordsService(
       pattern,
       dictionary.data.words,
-      limit
+      rawLimit
     )
 
     if (total === 0) {
@@ -39,10 +37,14 @@ export function searchWordsHandler (
       }
     }
 
-    const wordsDisplay = results.join(', ')
-    let output = `# RECHERCHE (${pattern.toUpperCase()})\n`
-    output += `${total} résultats - Affichés: ${results.length}\n\n`
+    console.log(total)
+
+    const wordsDisplay = results.join(' ')
+    let output = `${total} ${
+      total > 1 ? 'résultats - affichés' : 'résultat - affiché'
+    } ${results.length} (${pattern.toUpperCase()})\n\n`
     output += wordsDisplay
+    output += '.'
 
     return {
       success: true,

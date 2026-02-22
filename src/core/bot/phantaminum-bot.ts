@@ -1,6 +1,7 @@
 import { CommandRegistry } from '@shared/command/command-registry'
 import { DiscordClient } from '@shared/discord/discord-client'
 import { UserRegistry } from '@shared/user/user-registry'
+import { handleMessageCreate } from './message.create'
 
 export class PhantaminumBot {
   client: DiscordClient = DiscordClient.getInstance()
@@ -10,9 +11,9 @@ export class PhantaminumBot {
   async intializeBot () {
     await this.users.load()
     await this.commands.initializeCommands()
-    await this.client.start()
-    console.log(this)
+    const client = await this.client.start()
+    client?.on('messageCreate', async message =>  await handleMessageCreate(message, this))
+    
   }
 }
 
-console.log(await new PhantaminumBot().intializeBot())

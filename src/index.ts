@@ -1,8 +1,3 @@
-import { DiscordClient } from "@shared/discord/discord-client";
-import { words } from "@core/dictionary/dictionary.cache.js";
-import { searchWordsHandler } from "@features/search-words/search-words.handler";
-// src/index.ts
-// const discordClient = DiscordClient.getInstance()
-// await discordClient.start()
+import { PhantaminumBot } from '@core/bot/phantaminum-bot'
 
-console.log(searchWordsHandler(["er", "ede"]))
+console.log(await new PhantaminumBot().intializeBot())

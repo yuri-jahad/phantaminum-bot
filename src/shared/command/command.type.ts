@@ -3,17 +3,15 @@ export interface CommandResponse {
   msg: string
 }
 
-
 export interface CommandSecurity {
-  minRole?: UserRole 
+  minRole?: UserRole
   rules?: {
     [argIndex: number]: {
-      minRole: UserRole 
-      fallbackValue?: any 
+      minRole: UserRole
+      fallbackValue?: any
     }
   }
 }
-
 
 export type UserRole = 'moderator' | 'administrator' | 'every' | 'staff'
 
@@ -31,19 +29,16 @@ export interface CommandConfig {
 }
 
 export interface CommandModel {
-  default: {
-    variants: string[]
-    helper: string
-    config: CommandConfig
-    fn: (args: any) => any
-  }
+  variants: string[]
+  helper: string
+  config: CommandConfig
+  fn: (args: any) => any
 }
-
 
 export interface Command {
   variants: string[]
   helper: string
-  security?: CommandSecurity 
+  security?: CommandSecurity
   fn: (args: string[], message: any) => Promise<any>
 }
 

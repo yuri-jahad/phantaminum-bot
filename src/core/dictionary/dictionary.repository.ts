@@ -1,4 +1,4 @@
-import type { DictionaryList } from '@core/dictionary/dictionary.types.js'
+import type { DictionaryList } from '@core/dictionary/dictionary.type.js'
 
 export async function getDictionaryList (): Promise<DictionaryList> {
   try {
