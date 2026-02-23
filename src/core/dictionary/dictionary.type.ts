@@ -6,5 +6,5 @@ export interface DictionaryList {
 
 export interface DictionaryData {
   words: string[]
-  occurrences: Record<string, string>
+  occurrences: Record<string, number>
 }

@@ -26,3 +26,4 @@ class Dictionary {
 }
 await Dictionary.instance.load()
 export const words = Dictionary.instance.data
+console.log(Object.keys(words))

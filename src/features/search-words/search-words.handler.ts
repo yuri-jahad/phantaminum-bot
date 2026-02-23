@@ -2,47 +2,54 @@ import { words } from '@core/dictionary/dictionary.cache'
 import type { CommandResponse } from '@shared/command/command.type'
 import { searchWordsService } from '@features/search-words/search-words.service'
 
-export function searchWordsHandler (args: string[]): CommandResponse {
+export function searchWordsHandler(args: string[]): CommandResponse {
   const pattern = args[1] || ''
-  const rawLimit = args[2] ? parseInt(args[2]) : 10
-  //const limit = Math.min(Math.max(rawLimit, 1), 50)
+  const rawLimit = args[2] ? parseInt(args[2], 10) : 10
+  const limit = isNaN(rawLimit) ? 10 : rawLimit
 
   if (!pattern) {
     return {
       success: false,
-      msg: 'Usage: .c <pattern> [limit]\nExemple: .c maison 10'
+      msg: 'Utilisation invalide. Exemple correct : ".c maison" ou ".c maison 20" (limite optionnelle).'
+    }
+  }
+
+  if (args[2] && isNaN(rawLimit)) {
+    return {
+      success: false,
+      msg: `La limite "${args[2]}" n'est pas un nombre valide. Utilisez ".c ${pattern} 10".`
     }
   }
 
   try {
     const dictionary = words
-
     if (!dictionary.success) {
       return {
         success: false,
-        msg: "Le dictionnaire n'est pas disponible actuellement"
+        msg: 'Le dictionnaire est actuellement indisponible. Veuillez réessayer plus tard.'
       }
     }
 
     const { results, total } = searchWordsService(
       pattern,
       dictionary.data.words,
-      rawLimit
+      limit
     )
+
 
     if (total === 0) {
       return {
         success: false,
-        msg: `Aucun résultat pour "${pattern}"`
+        msg: `Je n'ai trouvé aucun mot correspondant au motif "${pattern}".`
       }
     }
 
-    console.log(total)
-
-    const wordsDisplay = results.join(' ')
+    const wordsDisplay = results.join(' ').replace(/\s+/g, ' ')
+    
     let output = `${total} ${
-      total > 1 ? 'résultats - affichés' : 'résultat - affiché'
-    } ${results.length} (${pattern.toUpperCase()})\n\n`
+      total > 1 ? 'résultats trouvés -' : 'résultat trouvé -'
+    } ${results.length} affiché(s) (${pattern.toUpperCase()})\n\n`
+    
     output += wordsDisplay
     output += '.'
 
@@ -51,10 +58,18 @@ export function searchWordsHandler (args: string[]): CommandResponse {
       msg: output
     }
   } catch (error) {
-    console.error('Erreur recherche:', error)
+    console.error(`[SearchWords] Erreur critique avec le motif "${pattern}":`, error)
+    
+    if (error instanceof SyntaxError) {
+      return {
+        success: false,
+        msg: `Le motif "${pattern}" est invalide (caractères spéciaux non supportés ou expression régulière erronée).`
+      }
+    }
+
     return {
       success: false,
-      msg: `Erreur système pour "${pattern}"`
+      msg: `Une erreur interne s'est produite lors de la recherche du motif "${pattern}".`
     }
   }
 }

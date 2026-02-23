@@ -1,20 +1,27 @@
+import { COLORS_MESSAGE } from '@shared/command/command.service'
 import { definitionApiRepo } from '@features/show-definitions/show-definitions.repository'
-import type {
-  CommandResponse,
-  DefinitionResult
-} from '@features/show-definitions/show-definitions.type'
+import type { DefinitionResult } from '@features/show-definitions/show-definitions.type'
+
+import type { CommandResponse } from '@shared/command/command.type'
 
 export async function showDefinitionshandler (
   args: string[]
 ): Promise<CommandResponse> {
   const word = args[1]
-  const rawLimit = (args[2] && parseInt(args[2])) || 3
-  const limit = Math.min(Math.max(rawLimit, 1), 10)
-  console.log(word)
+  const rawLimit = args[2] ? parseInt(args[2], 10) : 3
+  const limit = isNaN(rawLimit) ? 3 : Math.min(Math.max(rawLimit, 1), 10)
+
   if (!word) {
     return {
       success: false,
-      msg: 'Veuillez insérer un mot pour consulter sa définition. Exemple : .def maison.'
+      msg: 'Utilisation invalide. Exemple correct : ".def maison" ou ".def maison 5" (limite optionnelle).'
+    }
+  }
+
+  if (args[2] && isNaN(rawLimit)) {
+    return {
+      success: false,
+      msg: `La limite "${args[2]}" n'est pas un nombre valide. Utilisez ".def ${word} 3".`
     }
   }
 
@@ -24,15 +31,21 @@ export async function showDefinitionshandler (
     if (!result || !result.success || !result.definitions?.length) {
       return {
         success: false,
-        msg: `Définition non trouvée pour le mot "${word}".`
+        msg: `Je n'ai trouvé aucune définition pour le mot "${word}".`
       }
     }
 
     const { word_details, definitions } = result
     const displayDefs = definitions.slice(0, limit)
 
-    let output = `# ${word_details.word.toUpperCase()} - `
-    output += `${definitions.length} définitions - Affichées : ${displayDefs.length}\n\n`
+    const sourceColor = COLORS_MESSAGE.colors['yellow']
+    const defaultColor = COLORS_MESSAGE.colors['cyan']
+
+    let output = `\u001b[1m${definitions.length} ${
+      definitions.length > 1 ? 'définitions trouvées -' : 'définition trouvée -'
+    } ${
+      displayDefs.length
+    } affichée(s) (${word_details.word.toUpperCase()})\u001b[0m\n\n`
 
     output += displayDefs
       .map((def, index) => {
@@ -41,7 +54,11 @@ export async function showDefinitionshandler (
             ? def.definition.substring(0, 280) + '...'
             : def.definition
 
-        return `${index + 1}. ${text} (${def.source_name || 'Source inconnue'})`
+        const source = def.source_name
+          ? ` - ${sourceColor}${def.source_name}${defaultColor}`
+          : ''
+
+        return `${defaultColor}${index + 1}. ${text}${source}`
       })
       .join('\n\n')
 
@@ -50,9 +67,13 @@ export async function showDefinitionshandler (
       msg: output
     }
   } catch (error) {
+    console.error(
+      `[ShowDefinitions] Erreur critique avec le mot "${word}":`,
+      error
+    )
     return {
       success: false,
-      msg: `Erreur système - Impossible de récupérer les définitions pour "${word}."`
+      msg: `Une erreur interne s'est produite lors de la recherche de la définition pour "${word}".`
     }
   }
 }

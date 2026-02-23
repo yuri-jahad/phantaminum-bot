@@ -12,8 +12,9 @@ export class PhantaminumBot {
     await this.users.load()
     await this.commands.initializeCommands()
     const client = await this.client.start()
-    client?.on('messageCreate', async message =>  await handleMessageCreate(message, this))
-    
+    client?.on(
+      'messageCreate',
+      async message => await handleMessageCreate(message, this)
+    )
   }
 }
-

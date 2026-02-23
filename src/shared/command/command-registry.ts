@@ -2,7 +2,7 @@
 import type { CommandModel } from './command.type'
 import { join } from 'path'
 import { readdir } from 'node:fs/promises'
-import { Message } from 'discord.js'
+import type { Message } from 'discord.js'
 import { reformatTextService } from './command.service'
 
 export class CommandRegistry {
@@ -31,8 +31,10 @@ export class CommandRegistry {
             const module = (await import(itemPath)) as { default: CommandModel }
             const cmd = module.default
 
-            if (!cmd || !cmd.variants) {
-              console.warn(`[Warning] ${item} export is invalid.`)
+            if (!cmd || !cmd.variants || !cmd.fn) {
+              console.warn(
+                `[Warning] ${item} export is invalid (missing variants or fn).`
+              )
               continue
             }
 
@@ -70,16 +72,35 @@ export class CommandRegistry {
     return undefined
   }
 
-  async deployCommands (message: Message) {
-    if (message.author.bot || !message.content) return
-    const messages = message.content.toLowerCase().split(' ')
-    const firstCmd = messages[0]
-    if (!firstCmd) return
-    const commandContent = this.getCommandByTrigger(firstCmd)
-    if (!commandContent) return
-    const commandContentFn = await commandContent.fn(messages)
-    console.log(commandContentFn)
-    return reformatTextService(firstCmd, commandContentFn)
+  async deployCommands (message: Message): Promise<string[] | undefined> {
+    if (message.author.bot || !message.content) return undefined
+
+    const args = message.content.trim().split(/\s+/)
+    const firstCmd = args[0]
+
+    if (!firstCmd) return undefined
+
+    const commandModel = this.getCommandByTrigger(firstCmd)
+    if (!commandModel) return undefined
+
+    try {
+      const commandResult = await commandModel.fn(args)
+
+      if (Array.isArray(commandResult)) {
+        return commandResult
+      }
+
+      return reformatTextService(firstCmd, commandResult as any)
+    } catch (err) {
+      console.error(
+        `[CommandRegistry] Erreur lors de l'exécution de ${firstCmd}:`,
+        err
+      )
+      return reformatTextService(firstCmd, {
+        success: false,
+        msg: "Une erreur critique s'est produite lors de l'exécution de la commande."
+      })
+    }
   }
 
   get commands (): Map<string, CommandModel> {

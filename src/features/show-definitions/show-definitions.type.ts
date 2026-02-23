@@ -9,7 +9,4 @@ export interface DefinitionResult {
   definitions: Definition[]
 }
 
-export interface CommandResponse {
-  success: boolean
-  msg: string
-}
+
