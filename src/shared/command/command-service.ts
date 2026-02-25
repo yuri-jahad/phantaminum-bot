@@ -3,18 +3,19 @@ import type { CommandModel } from './command.type'
 import { join } from 'path'
 import { readdir } from 'node:fs/promises'
 import type { Message } from 'discord.js'
-import { reformatTextService } from './command.service'
+import { reformatTextService } from '@shared/utils/text'
 
-export class CommandRegistry {
+
+export class CommandService {
   private readonly cmds: Map<string, CommandModel> = new Map()
-  private static instance: null | CommandRegistry = null
+  private static instance: null | CommandService = null
   private readonly SYMBOLS: Set<string> = new Set(['.', '/'])
 
-  static getInstance (): CommandRegistry {
-    if (!CommandRegistry.instance) {
-      CommandRegistry.instance = new CommandRegistry()
+  static getInstance (): CommandService {
+    if (!CommandService.instance) {
+      CommandService.instance = new CommandService()
     }
-    return CommandRegistry.instance
+    return CommandService.instance
   }
 
   async initializeCommands (): Promise<void> {
@@ -90,10 +91,12 @@ export class CommandRegistry {
         return commandResult
       }
 
+      console.log("commande OK", message.author)
+
       return reformatTextService(firstCmd, commandResult as any)
     } catch (err) {
       console.error(
-        `[CommandRegistry] Erreur lors de l'exécution de ${firstCmd}:`,
+        `[CommandService] Erreur lors de l'exécution de ${firstCmd}:`,
         err
       )
       return reformatTextService(firstCmd, {

@@ -10,16 +10,8 @@ export const ANSI_COLORS = {
 
 export type MessageColor = keyof typeof ANSI_COLORS
 
-export const COLORS_MESSAGE = {
-  colors: ANSI_COLORS,
-  format(text: string, colorKey: MessageColor, cmd: string = ''): string {
-    const colorCode = ANSI_COLORS[colorKey]
-    return `${cmd}\`\`\`ansi\n${colorCode}${text}\u001b[0m\n\`\`\``
-  }
-} as const
-
 export const sleep = (time: number): Promise<void> =>
-  new Promise((resolve) => setTimeout(resolve, time))
+  new Promise(resolve => setTimeout(resolve, time))
 
 export const reformatTextService = (
   firstCmd: string,
@@ -97,3 +89,11 @@ export const reformatTextService = (
 
   return messages
 }
+
+export const COLORS_MESSAGE = {
+  colors: ANSI_COLORS,
+  format (text: string, colorKey: MessageColor, cmd: string = ''): string {
+    const colorCode = ANSI_COLORS[colorKey]
+    return `${cmd}\`\`\`ansi\n${colorCode}${text}\u001b[0m\n\`\`\``
+  }
+} as const
