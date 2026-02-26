@@ -1,4 +1,4 @@
-import { computerHandler } from '@features/computer-infos/computer-infos.handler'
+import { computerHandler } from '@features/computer-infos/handler'
 
 export default {
   variants: ['computer', 'sys', 'system'],

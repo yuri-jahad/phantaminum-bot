@@ -1,8 +1,8 @@
-import { CommandService } from '@shared/command/command-service'
-import { DiscordClient } from '@shared/discord/discord-client'
-import { UsersService } from '@shared/users/users-service'
+import { CommandService } from '@shared/command/service'
+import { DiscordClient } from '@shared/discord/client'
+import { UsersService } from '@shared/users/service'
 import { handleMessageCreate } from './message.create'
-import { GuildService } from '@shared/guild/guild-service'
+import { GuildService } from '@shared/guild/service'
 
 export class PhantaminumBot {
   client: DiscordClient = DiscordClient.getInstance()

@@ -1,5 +1,5 @@
-import type { CommandResponse } from '@shared/command/command.type'
-import { searchSyllablesRepository } from '@features/search-syllables/search-syllables.repository'
+import type { CommandResponse } from '@shared/command/type'
+import { searchSyllablesRepository } from '@features/search-syllables/repository'
 
 export async function searchSyllablesHandler(
   args: string[]

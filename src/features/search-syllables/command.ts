@@ -1,4 +1,4 @@
-import { searchSyllablesHandler } from './search-syllables.handler'
+import { searchSyllablesHandler } from './handler'
 
 export default {
   variants: ['s', 'syllables', 'syllable', 'occ'],

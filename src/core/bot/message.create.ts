@@ -1,7 +1,7 @@
 import type { Message } from 'discord.js'
 import { PhantaminumBot } from '@core/bot/phantaminum-bot'
 import { sleep } from 'bun'
-import { createUserFromMessage } from '@shared/user/user-service'
+import { createUserFromMessage } from '@shared/user/service'
 
 export const handleMessageCreate = async (
   message: Message,

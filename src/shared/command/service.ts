@@ -1,5 +1,5 @@
 // shared/command/command-registry.ts
-import type { CommandModel } from './command.type'
+import type { CommandModel } from './type'
 import { join } from 'path'
 import { readdir } from 'node:fs/promises'
 import type { Message } from 'discord.js'

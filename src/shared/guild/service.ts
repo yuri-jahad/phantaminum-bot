@@ -1,4 +1,4 @@
-import { DataService } from '@data/data-service'
+import { DataService } from '@data/service'
 import { join } from 'path'
 
 export class GuildService {

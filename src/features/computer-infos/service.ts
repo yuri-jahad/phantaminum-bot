@@ -1,5 +1,5 @@
 import os from 'os'
-import type { SystemInfo } from '@features/computer-infos/computer-infos.type'
+import type { SystemInfo } from '@features/computer-infos/type'
 
 const convertToGB = (bytes: number): string => {
   return (bytes / 1024 ** 3).toFixed(2)

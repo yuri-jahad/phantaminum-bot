@@ -1,4 +1,4 @@
-import { showDefinitionshandler } from '@features/show-definitions/show-definitions.handler'
+import { showDefinitionshandler } from '@features/show-definitions/handler'
 
 export default {
   variants: ['d', 'def', 'definition', 'define'],

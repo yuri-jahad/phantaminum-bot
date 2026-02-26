@@ -1,6 +1,6 @@
-import { ANSI_COLORS } from '@shared/command/command.service'
-import { getSystemInfoService } from '@features/computer-infos/computer-infos.service'
-import type { CommandResponse } from '@shared/command/command.type'
+import { getSystemInfoService } from '@features/computer-infos/service'
+import type { CommandResponse } from '@shared/command/type'
+import { ANSI_COLORS } from '@shared/utils/text'
 
 export const computerHandler = (args: string[]): CommandResponse => {
   try {

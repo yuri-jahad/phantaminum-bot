@@ -1,4 +1,4 @@
-import { searchWordsHandler } from '@features/search-words/search-words.handler'
+import { searchWordsHandler } from '@features/search-words/handler'
 
 export default {
   variants: ['c', 'search', 'dico', 'dictionary'],
@@ -6,8 +6,7 @@ export default {
   config: {
     role: 'every',
     limit: {
-      timeSecond: 30 * 60, // s
-      max: 100
+      fallback: 20
     }
   },
 

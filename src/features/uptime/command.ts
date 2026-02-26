@@ -1,4 +1,4 @@
-import { uptimeHandler } from '@features/uptime/uptime.handler'
+import { uptimeHandler } from '@features/uptime/handler'
 
 export default {
   variants: ['uptime', 'up'],

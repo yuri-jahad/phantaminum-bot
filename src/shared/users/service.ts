@@ -1,5 +1,5 @@
-import { DataService, USERS_DATA_PATH } from '@data/data-service'
-import type { User, USER_ROLE } from '@shared/user/user.type'
+import { DataService, USERS_DATA_PATH } from '@data/service'
+import type { User, USER_ROLE } from '@shared/user/type'
 
 export class UsersService {
   private static instance: UsersService | null = null
@@ -44,6 +44,19 @@ export class UsersService {
 
     this._users.set(user.id, user)
     await this.save()
+  }
+
+  async setMute (authorId: string, targetId: string): Promise<boolean> {
+    if (authorId !== Bun.env.DISCORD_OWNER_ID) return false
+
+    const user = this._users.get(targetId)
+    if (!user) return false
+
+    if (user.muted) return true
+
+    user.muted = true
+    await this.save()
+    return true
   }
 
   getRoleById (id: string): USER_ROLE | undefined {

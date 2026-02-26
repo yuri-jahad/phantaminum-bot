@@ -1,8 +1,8 @@
-import { COLORS_MESSAGE } from '@shared/command/command.service'
-import { definitionApiRepo } from '@features/show-definitions/show-definitions.repository'
-import type { DefinitionResult } from '@features/show-definitions/show-definitions.type'
+import { definitionApiRepo } from '@features/show-definitions/repository'
+import type { DefinitionResult } from '@features/show-definitions/type'
 
-import type { CommandResponse } from '@shared/command/command.type'
+import type { CommandResponse } from '@shared/command/type'
+import { COLORS_MESSAGE } from '@shared/utils/text'
 
 export async function showDefinitionshandler (
   args: string[]

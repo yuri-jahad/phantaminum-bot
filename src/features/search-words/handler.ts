@@ -1,6 +1,6 @@
-import { words } from '@core/dictionary/dictionary.cache'
-import type { CommandResponse } from '@shared/command/command.type'
-import { searchWordsService } from '@features/search-words/search-words.service'
+import { words } from '@core/dictionary/cache'
+import type { CommandResponse } from '@shared/command/type'
+import { searchWordsService } from '@features/search-words/service'
 
 export function searchWordsHandler(args: string[]): CommandResponse {
   const pattern = args[1] || ''

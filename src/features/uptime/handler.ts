@@ -1,6 +1,6 @@
-import type { CommandResponse } from '@shared/command/command.type'
+import type { CommandResponse } from '@shared/command/type'
 import { formatUptimeService, startTime } from '@features/uptime/uptime.service'
-import { ANSI_COLORS } from '@shared/command/command.service'
+import { ANSI_COLORS } from '@shared/utils/text'
 
 export const uptimeHandler = (args: string[]): CommandResponse => {
   try {

@@ -1,5 +1,5 @@
-import { getDictionaryList } from '@core/dictionary/dictionary.repository.js'
-import type { DictionaryList } from '@core/dictionary/dictionary.type.js'
+import { getDictionaryList } from '@core/dictionary/repository.js'
+import type { DictionaryList } from '@core/dictionary/type.js'
 
 class Dictionary {
   private static _instance: Dictionary | null = null

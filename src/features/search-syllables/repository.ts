@@ -1,4 +1,4 @@
-import { words } from '@core/dictionary/dictionary.cache'
+import { words } from '@core/dictionary/cache'
 import { shuffle } from '@shared/utils/array'
 
 export const searchSyllablesRepository = async (
