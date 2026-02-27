@@ -12,21 +12,3 @@ export default {
 
   fn: searchWordsHandler
 }
-
-/**
- *
- * OWNER :
- * -> Owner choisit le temps
- * -> Le nombre de tentatives par temps
- *
- * -> role du commanditaire de la commande
- * -> role des sous-commandes
- * -> valeur par défaut du nombre de solutions
- * -> Authorization des sous commandes
- *
- *
- *
- *
- *
- *
- */

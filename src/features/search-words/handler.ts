@@ -1,8 +1,18 @@
 import { words } from '@core/dictionary/cache'
-import type { CommandResponse } from '@shared/command/type'
+import type { CommandResponse, CommandContext } from '@shared/command/type'
 import { searchWordsService } from '@features/search-words/service'
 
-export function searchWordsHandler(args: string[]): CommandResponse {
+export function searchWordsHandler ({
+  args,
+  bot,
+  message,
+  clientGuard
+}: CommandContext): CommandResponse {
+  const guard = clientGuard(bot, message.author.id, ['admin', 'staff'])
+
+  if (!guard.success && guard.msg) {
+    return guard
+  }
   const pattern = args[1] || ''
   const rawLimit = args[2] ? parseInt(args[2], 10) : 10
   const limit = isNaN(rawLimit) ? 10 : rawLimit
@@ -36,7 +46,6 @@ export function searchWordsHandler(args: string[]): CommandResponse {
       limit
     )
 
-
     if (total === 0) {
       return {
         success: false,
@@ -45,11 +54,11 @@ export function searchWordsHandler(args: string[]): CommandResponse {
     }
 
     const wordsDisplay = results.join(' ').replace(/\s+/g, ' ')
-    
+
     let output = `${total} ${
       total > 1 ? 'résultats trouvés -' : 'résultat trouvé -'
     } ${results.length} affiché(s) (${pattern.toUpperCase()})\n\n`
-    
+
     output += wordsDisplay
     output += '.'
 
@@ -58,8 +67,11 @@ export function searchWordsHandler(args: string[]): CommandResponse {
       msg: output
     }
   } catch (error) {
-    console.error(`[SearchWords] Erreur critique avec le motif "${pattern}":`, error)
-    
+    console.error(
+      `[SearchWords] Erreur critique avec le motif "${pattern}":`,
+      error
+    )
+
     if (error instanceof SyntaxError) {
       return {
         success: false,

@@ -4,7 +4,8 @@ import { join } from 'path'
 import { readdir } from 'node:fs/promises'
 import type { Message } from 'discord.js'
 import { reformatTextService } from '@shared/utils/text'
-
+import type { PhantaminumBot } from '@core/bot/phantaminum-bot'
+import { clientGuard } from '@shared/user/guard'
 
 export class CommandService {
   private readonly cmds: Map<string, CommandModel> = new Map()
@@ -26,7 +27,7 @@ export class CommandService {
       const entries: string[] = await readdir(featuresPATH, { recursive: true })
 
       for (const item of entries) {
-        if (item.endsWith('.command.ts')) {
+        if (item.endsWith('command.ts')) {
           const itemPath = join(featuresPATH, item)
           try {
             const module = (await import(itemPath)) as { default: CommandModel }
@@ -73,10 +74,13 @@ export class CommandService {
     return undefined
   }
 
-  async deployCommands (message: Message): Promise<string[] | undefined> {
+  async deployCommands (
+    message: Message,
+    bot: PhantaminumBot
+  ): Promise<string[] | undefined> {
     if (message.author.bot || !message.content) return undefined
 
-    const args = message.content.trim().split(/\s+/)
+    const args = message.content.toLowerCase().trim().split(/\s+/)
     const firstCmd = args[0]
 
     if (!firstCmd) return undefined
@@ -85,13 +89,16 @@ export class CommandService {
     if (!commandModel) return undefined
 
     try {
-      const commandResult = await commandModel.fn(args)
+      const commandResult = await commandModel.fn({
+        args,
+        bot,
+        message,
+        clientGuard
+      })
 
       if (Array.isArray(commandResult)) {
         return commandResult
       }
-
-      console.log("commande OK", message.author)
 
       return reformatTextService(firstCmd, commandResult as any)
     } catch (err) {

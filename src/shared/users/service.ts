@@ -59,14 +59,14 @@ export class UsersService {
     return true
   }
 
-  getRoleById (id: string): USER_ROLE | undefined {
-    return this._users.get(id)?.role
+  getUser (id: string): User | undefined {
+    return this._users.get(id)
   }
 
   getIdByName (name: string): string[] {
     const ids: string[] = []
     for (const user of this._users.values()) {
-      if (user.username === name) {
+      if (user.username.toLowerCase() === name) {
         ids.push(user.id)
       }
     }

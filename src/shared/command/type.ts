@@ -1,3 +1,7 @@
+import type { PhantaminumBot } from '@core/bot/phantaminum-bot'
+import type { Message } from 'discord.js'
+import { clientGuard } from '../user/guard';
+
 export interface CommandResponse {
   success: boolean
   msg: string
@@ -32,7 +36,15 @@ export interface CommandModel {
   variants: string[]
   helper: string
   config: CommandConfig
-  fn: (args: any) => any
+  fn: (ctx: CommandContext) => any
+}
+
+export interface CommandContext {
+  args: string[]
+  bot: PhantaminumBot
+  message: Message
+  clientGuard: typeof clientGuard
+  [key: string]: any
 }
 
 export interface Command {

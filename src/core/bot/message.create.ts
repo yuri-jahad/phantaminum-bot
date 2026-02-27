@@ -9,7 +9,7 @@ export const handleMessageCreate = async (
 ): Promise<void> => {
   if (message.author.bot) return
 
-  const commandFnContent = await bot.commands.deployCommands(message)
+  const commandFnContent = await bot.commands.deployCommands(message, bot)
 
   if (!commandFnContent || commandFnContent.length === 0) return
 

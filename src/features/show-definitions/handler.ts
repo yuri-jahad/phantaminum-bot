@@ -1,12 +1,13 @@
 import { definitionApiRepo } from '@features/show-definitions/repository'
 import type { DefinitionResult } from '@features/show-definitions/type'
-
-import type { CommandResponse } from '@shared/command/type'
+import type { CommandResponse, CommandContext } from '@shared/command/type'
 import { COLORS_MESSAGE } from '@shared/utils/text'
 
-export async function showDefinitionshandler (
-  args: string[]
-): Promise<CommandResponse> {
+export async function showDefinitionshandler ({
+  args,
+  bot,
+  message
+}: CommandContext): Promise<CommandResponse> {
   const word = args[1]
   const rawLimit = args[2] ? parseInt(args[2], 10) : 3
   const limit = isNaN(rawLimit) ? 3 : Math.min(Math.max(rawLimit, 1), 10)

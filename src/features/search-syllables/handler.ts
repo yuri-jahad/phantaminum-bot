@@ -1,8 +1,8 @@
 import type { CommandResponse } from '@shared/command/type'
 import { searchSyllablesRepository } from '@features/search-syllables/repository'
-
+import type { CommandContext } from '../../shared/command/type';
 export async function searchSyllablesHandler(
-  args: string[]
+ { args, bot,  message }: CommandContext
 ): Promise<CommandResponse> {
   const [_, arg1, arg2] = args
 

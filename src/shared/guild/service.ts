@@ -3,9 +3,7 @@ import { join } from 'path'
 
 export class GuildService {
   private static instance: GuildService | null = null
-
   readonly guilds: Map<string, Set<string>> = new Map()
-
   readonly dataService: DataService = DataService.getInstance()
   readonly path = join(import.meta.dir, '..', '..', 'data/guilds.json')
 

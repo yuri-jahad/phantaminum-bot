@@ -1,8 +1,8 @@
-import type { CommandResponse } from '@shared/command/type'
+import type { CommandResponse, CommandContext } from '@shared/command/type'
 import { formatUptimeService, startTime } from '@features/uptime/uptime.service'
 import { ANSI_COLORS } from '@shared/utils/text'
 
-export const uptimeHandler = (args: string[]): CommandResponse => {
+export const uptimeHandler = ({ args, bot, message }: CommandContext): CommandResponse => {
   try {
     const uptime = formatUptimeService(startTime)
     const { yellow,  cyan, green } = ANSI_COLORS
