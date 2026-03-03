@@ -1,7 +1,11 @@
 import type { CommandContext } from '@shared/command/type'
 
-
-export function getIdHandler ({ args, bot, message, clientGuard }: CommandContext) {
+export function getIdHandler ({
+  args,
+  bot,
+  message,
+  clientGuard
+}: CommandContext) {
   const guard = clientGuard(bot, message.author.id, ['admin'])
   if (!guard.success) return guard
 

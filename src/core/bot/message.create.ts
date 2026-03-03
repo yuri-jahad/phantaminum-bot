@@ -3,6 +3,7 @@ import { PhantaminumBot } from '@core/bot/phantaminum-bot'
 import { sleep } from 'bun'
 import { createUserFromMessage } from '@shared/user/service'
 import { reformatTextService } from '@shared/utils/text'
+import { guildGuard } from '@shared/guild/guard'
 
 export const handleMessageCreate = async (
   message: Message,
@@ -10,14 +11,16 @@ export const handleMessageCreate = async (
 ): Promise<void> => {
   if (message.author.bot) return
 
+  const isAuthorizedContext = guildGuard(message, bot)
+  if (!isAuthorizedContext) return
+
   const currentUser = bot.users.getUser(message.author.id)
 
   if (currentUser?.muted && message.content.startsWith('.')) {
-    const formattedMessages = reformatTextService('', {
+    const formattedMessages = reformatTextService('mute', {
       success: false,
       msg: `Action impossible : ${currentUser.username}, vos droits d'interaction avec le bot ont été suspendus.`
     })
-
     await message.reply(formattedMessages[0] || '')
     return
   }

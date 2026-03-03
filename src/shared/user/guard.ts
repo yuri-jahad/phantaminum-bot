@@ -1,5 +1,6 @@
 import type { PhantaminumBot } from '@core/bot/phantaminum-bot'
 import type { USER_ROLE } from './type'
+import type { Message } from 'discord.js'
 
 type GuardResult = {
   success: boolean
@@ -9,7 +10,7 @@ type GuardResult = {
 export const clientGuard = (
   bot: PhantaminumBot,
   userId: string,
-  allowedRoles: USER_ROLE[]
+  allowedRoles: USER_ROLE[], 
 ): GuardResult => {
   const user = bot.users.getUser(userId)
 

@@ -17,6 +17,11 @@ export const reformatTextService = (
   firstCmd: string,
   result: string | { success: boolean; msg: string }
 ): string[] => {
+  const actualMsg = typeof result === 'object' && result !== null ? result.msg : String(result)
+  if (!actualMsg || actualMsg.trim() === '') {
+    return []
+  }
+
   const cmdTitle = `${firstCmd}\n`
   const CHUNK_SIZE = 962
   const messages: string[] = []

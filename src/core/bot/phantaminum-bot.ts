@@ -10,7 +10,7 @@ export class PhantaminumBot {
   commands: CommandService = CommandService.getInstance()
   guilds: GuildService = GuildService.getInstance()
 
-  async intializeBot () {
+  async initializeBot () {
     await this.users.load()
     await this.commands.initializeCommands()
     const client = await this.client.start()

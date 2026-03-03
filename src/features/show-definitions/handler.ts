@@ -3,7 +3,7 @@ import type { DefinitionResult } from '@features/show-definitions/type'
 import type { CommandResponse, CommandContext } from '@shared/command/type'
 import { COLORS_MESSAGE } from '@shared/utils/text'
 
-export async function showDefinitionshandler ({
+export async function showDefinitionsHandler ({
   args,
   bot,
   message
