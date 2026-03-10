@@ -1,11 +1,11 @@
 import type { CommandContext, CommandResponse } from '@shared/command/type'
-import { COLORS_MESSAGE } from '@shared/utils/text'
+import { ANSI_COLORS, fitsInMessage } from '@shared/utils/text'
 
-export function surahHandler ({ args, bot }: CommandContext): CommandResponse {
+export function surahHandler ({ args, bot }: CommandContext): CommandResponse | string[] {
   if (args.length < 2) {
     return {
       success: false,
-      msg: 'Syntaxe invalide\nUtilisation correcte : .sourate 2 ou .sourate fatiha 2'
+      msg: 'Syntaxe invalide'
     }
   }
 
@@ -15,10 +15,18 @@ export function surahHandler ({ args, bot }: CommandContext): CommandResponse {
   const lastArg = queryArgs[queryArgs.length - 1]
   if (queryArgs.length > 1 && !isNaN(Number(lastArg))) {
     pageNumber = Math.max(1, Number(lastArg))
-    queryArgs.pop()
+    queryArgs = queryArgs.slice(0, -1)
   }
 
   const query = queryArgs.join(' ').trim()
+
+  if (!query) {
+    return {
+      success: false,
+      msg: 'Syntaxe invalide'
+    }
+  }
+
   const surah = bot.quran.getSurah(query)
 
   if (!surah) {
@@ -28,8 +36,55 @@ export function surahHandler ({ args, bot }: CommandContext): CommandResponse {
     }
   }
 
-  const VERSES_PER_PAGE = 10
-  const totalPages = Math.ceil(surah.content.length / VERSES_PER_PAGE)
+  const RESET   = '\u001b[0m'
+  const MAGENTA = ANSI_COLORS.magenta
+  const BLUE    = ANSI_COLORS.blue
+  const CYAN    = ANSI_COLORS.cyan
+  const YELLOW  = ANSI_COLORS.yellow
+
+  const buildOutput = (versesPerPage: number): { output: string, totalPages: number } => {
+    const totalPages = Math.ceil(surah.content.length / versesPerPage)
+    const startIndex = (pageNumber - 1) * versesPerPage
+    const versesToDisplay = surah.content.slice(startIndex, startIndex + versesPerPage)
+
+    let output = ''
+
+    output += `${MAGENTA}┌─────────────────────────────────────┐${RESET}\n`
+    output += `${MAGENTA}│ ${surah.transcription.toUpperCase().padEnd(37)}${MAGENTA}│${RESET}\n`
+    output += `${MAGENTA}└─────────────────────────────────────┘${RESET}\n\n`
+
+    output += `${BLUE}Nom arabe  ${RESET}: ${surah.name}\n`
+    output += `${BLUE}Traduction ${RESET}: ${surah.translation}\n`
+    output += `${BLUE}Versets    ${RESET}: ${surah.verseCount}   ${BLUE}Page ${RESET}: ${pageNumber}/${totalPages}\n`
+
+    output += `\n${YELLOW}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${RESET}\n\n`
+
+    versesToDisplay.forEach((verse, i) => {
+      const verseNumber = startIndex + i + 1
+      output += `${YELLOW}${String(verseNumber).padStart(3, '0')}${RESET} ${CYAN}${verse}${RESET}\n`
+    })
+
+    if (pageNumber < totalPages) {
+      output += `\n${YELLOW}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${RESET}\n`
+      output += `${BLUE}▶ .surah ${query} ${pageNumber + 1} pour la suite${RESET}`
+    }
+
+    return { output, totalPages }
+  }
+
+  let versesPerPage = 10
+  let output!: string
+  let totalPages!: number
+  let ansiMessage!: string
+
+  while (versesPerPage > 1) {
+    const result = buildOutput(versesPerPage)
+    output = result.output
+    totalPages = result.totalPages
+    ansiMessage = `\`\`\`ansi\n${output.trimEnd()}\n\`\`\``
+    if (fitsInMessage(ansiMessage)) break
+    versesPerPage--
+  }
 
   if (pageNumber > totalPages) {
     return {
@@ -38,36 +93,9 @@ export function surahHandler ({ args, bot }: CommandContext): CommandResponse {
     }
   }
 
-  const titleColor = COLORS_MESSAGE.colors['magenta']
-  const resetColor = '\u001b[0m'
-  const defaultColor = COLORS_MESSAGE.colors['blue']
-  const verseColor = COLORS_MESSAGE.colors['cyan']
-
-  let output = `${titleColor}SOURATE : ${surah.transcription}${resetColor} (${surah.name})\n`
-  output += `${defaultColor}Traduction : ${surah.translation}${resetColor}\n`
-  output += `${defaultColor}Taille : ${surah.verseCount} | Page ${pageNumber}/${totalPages}${resetColor}\n\n`
-
-  const startIndex = (pageNumber - 1) * VERSES_PER_PAGE
-  const endIndex = startIndex + VERSES_PER_PAGE
-  const versesToDisplay = surah.content.slice(startIndex, endIndex)
-
-  output += `${titleColor}Versets :${resetColor}\n`
-
-  versesToDisplay.forEach(verse => {
-    output += `${verseColor}${verse}${resetColor}\n`
-  })
-
-  if (pageNumber < totalPages) {
-    output += `\n${defaultColor}Utilisez .sourate ${query} ${
-      pageNumber + 1
-    } pour voir la suite.${resetColor}`
-  }
-
   const paddedSurahNb = String(surah.surahNb).padStart(3, '0')
   const audioUrl = `https://server8.mp3quran.net/afs/${paddedSurahNb}.mp3`
+  const audioMessage = `🔊 Écouter la sourate :\n${audioUrl}`
 
-  const ansiMessage = `\`\`\`ansi\n${output.trimEnd()}\n\`\`\``
-  const audioMessage = `🔊 **Écouter la sourate :**\n${audioUrl}`
-
-  return [ansiMessage, audioMessage] as any
+  return [ansiMessage, audioMessage]
 }

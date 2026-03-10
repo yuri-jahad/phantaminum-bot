@@ -1,47 +1,72 @@
 import { CommandService } from '@shared/command/service'
-import type { CommandResponse, CommandContext } from '@shared/command/type'
-import type { Message } from 'discord.js'
+import type { CommandResponse, CommandContext, CommandModel } from '@shared/command/type'
+import { ANSI_COLORS, fitsInMessage } from '@shared/utils/text'
 
-export async function helpHandler ({
-  message
-}: CommandContext): Promise<CommandResponse> {
+const CATEGORIES: { label: string; keys: string[] }[] = [
+  { label: 'RECHERCHE',      keys: ['c', 's', 'd', 'pick', 'lexic', 'phon'] },
+  { label: 'MA LISTE',       keys: ['ml', 'mla', 'mld'] },
+  { label: 'ISLAMIQUE',      keys: ['surah'] },
+  { label: 'SYSTÈME',        keys: ['uptime', 'computer', 'id'] },
+  { label: 'ADMINISTRATION', keys: ['mute', 'unmute', 'addchannel', 'deletechannel', 'listguilds'] },
+  { label: 'AIDE',           keys: ['help'] },
+]
+
+export async function helpHandler(_ctx: CommandContext): Promise<CommandResponse | string[]> {
   try {
     const commandService = CommandService.getInstance()
     const allCommandsMap = commandService.commands
 
-    const uniqueCommands = new Set(allCommandsMap.values())
+    const MAGENTA = ANSI_COLORS.magenta
+    const CYAN    = ANSI_COLORS.cyan
+    const BLUE    = ANSI_COLORS.blue
+    const RESET   = '\u001b[0m'
 
-    let helpMsg = `\`\`\`yaml\n`
-    helpMsg += `# =========================================\n`
-    helpMsg += `# SYSTEME D'ASSISTANCE DU BOT\n`
-    helpMsg += `# =========================================\n\n`
+    const sep   = `${BLUE}${'─'.repeat(42)}${RESET}`
+    const title = `${MAGENTA}AIDE DU BOT${RESET}\n${sep}`
 
-    for (const cmd of uniqueCommands) {
-      if (cmd.variants && cmd.variants.length > 0) {
-        const mainCommand = cmd.variants[0]
-        const aliases = cmd.variants.slice(1)
-        const aliasText =
-          aliases.length > 0 ? ` [Alias: ${aliases.join(', ')}]` : ''
+    const blocks: string[] = [title]
 
-        const helperText = cmd.helper || 'Aucune description fournie.'
+    for (const category of CATEGORIES) {
+      const cmds = category.keys
+        .map(k => allCommandsMap.get(k) as CommandModel | undefined)
+        .filter((c): c is CommandModel => c != null)
 
-        helpMsg += `🔹 .${mainCommand}${aliasText}\n`
-        helpMsg += `   - ${helperText}\n\n`
+      if (cmds.length === 0) continue
+
+      let block = `\n${MAGENTA}◆ ${category.label}${RESET}\n`
+
+      for (const cmd of cmds) {
+        const [main, ...aliases] = cmd.variants
+        const mainPart  = `${CYAN}.${main}${RESET}`
+        const aliasPart = aliases.length > 0
+          ? ` ${BLUE}/ ${aliases.map(a => `.${a}`).join(' / ')}${RESET}`
+          : ''
+        const descPart  = `  ${BLUE}└─${RESET} ${cmd.helper}`
+        block += `\n  ${mainPart}${aliasPart}\n${descPart}`
+      }
+
+      blocks.push(block)
+    }
+
+    const messages: string[] = []
+    let currentContent: string = blocks[0] ?? ''
+
+    for (let i = 1; i < blocks.length; i++) {
+      const candidate = currentContent + '\n' + blocks[i]
+      const candidateMsg = `\`\`\`ansi\n${candidate}\n\`\`\``
+      if (!fitsInMessage(candidateMsg) && currentContent !== (blocks[0] ?? '')) {
+        messages.push(`\`\`\`ansi\n${currentContent}\n\`\`\``)
+        currentContent = blocks[i] ?? ''
+      } else {
+        currentContent = candidate
       }
     }
 
-    helpMsg += `\`\`\``
-
-    if (message.channel.isSendable()) {
-      await message.channel.send(helpMsg)
-    } else {
-      await message.reply(helpMsg)
+    if (currentContent.trim()) {
+      messages.push(`\`\`\`ansi\n${currentContent}\n\`\`\``)
     }
 
-    return {
-      success: true,
-      msg: ''
-    }
+    return messages
   } catch (error) {
     console.error(`[HelpHandler] Erreur de generation:`, error)
     return {

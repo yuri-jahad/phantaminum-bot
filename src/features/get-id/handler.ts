@@ -1,11 +1,12 @@
-import type { CommandContext } from '@shared/command/type'
+import type { CommandContext, CommandResponse } from '@shared/command/type'
+import { ANSI_COLORS } from '@shared/utils/text'
 
 export function getIdHandler ({
   args,
   bot,
   message,
   clientGuard
-}: CommandContext) {
+}: CommandContext): CommandResponse | string[] {
   const guard = clientGuard(bot, message.author.id, ['admin'])
   if (!guard.success) return guard
 
@@ -26,10 +27,14 @@ export function getIdHandler ({
     }
   }
 
-  return {
-    success: true,
-    msg: `Identifiant(s) trouvé(s) pour ${targetUsername} :\n${userIds.join(
-      '\n'
-    )}`
-  }
+  const MAGENTA = ANSI_COLORS.magenta
+  const CYAN    = ANSI_COLORS.cyan
+  const BLUE    = ANSI_COLORS.blue
+  const RESET   = '\u001b[0m'
+
+  const header  = `${MAGENTA}IDENTIFIANT(S) TROUVÉ(S)${RESET}\n`
+  const info    = `${BLUE}Cible : "${targetUsername}" | Résultats : ${userIds.length}${RESET}\n\n`
+  const idLines = userIds.map(id => `${CYAN}• ${id}${RESET}`).join('\n')
+
+  return [`\`\`\`ansi\n${(header + info + idLines).trimEnd()}\n\`\`\``]
 }

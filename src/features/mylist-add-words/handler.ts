@@ -1,14 +1,15 @@
 import type { CommandResponse, CommandContext } from '@shared/command/type'
+import { ANSI_COLORS } from '@shared/utils/text'
 
 export async function addWordsHandler({
   args,
   bot,
   message,
   clientGuard
-}: CommandContext): Promise<CommandResponse> {
+}: CommandContext): Promise<CommandResponse | string[]> {
   const guard = clientGuard(bot, message.author.id, ['user'])
 
-  if (!guard.success && guard.msg) {
+  if (!guard.success) {
     return guard
   }
 
@@ -24,16 +25,6 @@ export async function addWordsHandler({
   try {
     const { addedWords, existingWords } = await bot.users.addWords(message.author.id, wordsToAdd)
 
-    let output = ''
-
-    if (addedWords.length > 0) {
-      output += `${addedWords.length} mot(s) ajouté(s) avec succès :\n${addedWords.join(', ').toUpperCase()}\n\n`
-    }
-
-    if (existingWords.length > 0) {
-      output += `${existingWords.length} mot(s) déjà dans votre liste :\n${existingWords.join(', ').toUpperCase()}\n\n`
-    }
-
     if (addedWords.length === 0) {
       return {
         success: false,
@@ -41,10 +32,25 @@ export async function addWordsHandler({
       }
     }
 
-    return {
-      success: true,
-      msg: output.trimEnd()
+    const CYAN   = ANSI_COLORS.cyan
+    const BLUE   = ANSI_COLORS.blue
+    const GREEN  = ANSI_COLORS.green
+    const YELLOW = ANSI_COLORS.yellow
+    const RESET  = '\u001b[0m'
+
+    let output = ''
+
+    const addedLabel = `${GREEN}${addedWords.length} mot(s) ajouté(s)${RESET}\n`
+    const addedList  = addedWords.map(w => `${CYAN}${w.toUpperCase()}${RESET}`).join(' ')
+    output += `${addedLabel}${addedList}`
+
+    if (existingWords.length > 0) {
+      const existingLabel = `${YELLOW}${existingWords.length} mot(s) déjà présent(s)${RESET}\n`
+      const existingList  = existingWords.map(w => `${BLUE}${w.toUpperCase()}${RESET}`).join(' ')
+      output += `\n\n${existingLabel}${existingList}`
     }
+
+    return [`\`\`\`ansi\n${output.trimEnd()}\n\`\`\``]
   } catch (error) {
     console.error(`[AddWords] Erreur lors de l'ajout pour l'utilisateur ${message.author.id}:`, error)
     return {

@@ -5,7 +5,7 @@ import { COLORS_MESSAGE } from '@shared/utils/text'
 
 export async function lexiconHandler({
   args
-}: CommandContext): Promise<CommandResponse> {
+}: CommandContext): Promise<CommandResponse | string[]> {
   const targetPhon = args[1]
   const targetSyllables = args[2] ? parseInt(args[2], 10) : undefined
 
@@ -54,7 +54,7 @@ export async function lexiconHandler({
 
     const ansiMessage = `\`\`\`ansi\n${output.trimEnd()}\n\`\`\``
 
-    return [ansiMessage] as any
+    return [ansiMessage]
 
   } catch (error: any) {
     console.error(`[LexiconHandler] Erreur :`, error)

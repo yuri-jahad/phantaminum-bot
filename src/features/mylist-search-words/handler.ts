@@ -1,16 +1,17 @@
 import { words } from '@core/dictionary/cache'
 import type { CommandResponse, CommandContext } from '@shared/command/type'
 import { searchWords, shuffle } from '@shared/utils/array'
+import { ANSI_COLORS, fitsInMessage } from '@shared/utils/text'
 
 export function myListSearchWordsHandler({
   args,
   bot,
   message,
   clientGuard
-}: CommandContext): CommandResponse {
+}: CommandContext): CommandResponse | string[] {
   const guard = clientGuard(bot, message.author.id, ['user'])
 
-  if (!guard.success && guard.msg) {
+  if (!guard.success) {
     return guard
   }
 
@@ -34,14 +35,19 @@ export function myListSearchWordsHandler({
   const pattern = args[1] || ''
   const hasPattern = pattern.trim().length > 0
 
-  const rawLimit = args[2] ? parseInt(args[2], 10) : hasPattern ? 10 : 20
-  const limit = isNaN(rawLimit) ? (hasPattern ? 10 : 20) : rawLimit
+  const DEFAULT_LIMIT = hasPattern ? 10 : 20
+  const isElevated = role === 'admin' || role === 'owner'
 
-  if (args[2] && isNaN(rawLimit)) {
-    return {
-      success: false,
-      msg: `La limite "${args[2]}" n'est pas un nombre valide. Exemple : ".list ${pattern || '20'}".`
+  let limit = DEFAULT_LIMIT
+  if (isElevated && args[2]) {
+    const parsed = parseInt(args[2], 10)
+    if (isNaN(parsed)) {
+      return {
+        success: false,
+        msg: `La limite "${args[2]}" n'est pas un nombre valide.`
+      }
     }
+    limit = parsed
   }
 
   try {
@@ -65,22 +71,60 @@ export function myListSearchWordsHandler({
       }
     }
 
-    const wordsDisplay = results.join(' ').replace(/\s+/g, ' ')
-    
-    const headerTitle = hasPattern ? `RECHERCHE : ${pattern.toUpperCase()}` : 'APERÇU DE LA LISTE'
+    const CYAN = ANSI_COLORS.cyan
+    const BLUE = ANSI_COLORS.blue
+    const RESET = '\u001b[0m'
+
     const plurielMot = total > 1 ? 'mots' : 'mot'
-    
-    let output = `[${role.toUpperCase()}] ${username.toUpperCase()}\n`
-    output += `${headerTitle}\n`
-    output += `${total} ${plurielMot} au total | ${results.length} affiché(s)\n\n`
+    const headerTitle = hasPattern ? `${CYAN}RECHERCHE : ${pattern.toUpperCase()}${RESET}` : `${CYAN}APERÇU DE LA LISTE${RESET}`
 
-    output += wordsDisplay
-    output += '.'
+    const headerBlock = `${BLUE}[${role.toUpperCase()}]${RESET} ${CYAN}${username.toUpperCase()}${RESET}\n`
+      + `${headerTitle}\n`
+      + `${BLUE}${total} ${plurielMot} au total | ${results.length} affiché(s)${RESET}\n\n`
 
-    return {
-      success: true,
-      msg: output
+    const highlightRegex = hasPattern ? new RegExp(pattern, 'gi') : null
+    const coloredWords = hasPattern
+      ? results.map(word =>
+          `${BLUE}${word.replace(highlightRegex!, match => `${RESET}${CYAN}${match}${RESET}${BLUE}`)}${RESET}`
+        )
+      : results.map(w => `${BLUE}${w}${RESET}`)
+
+    const patternLabel = hasPattern ? `${CYAN}${pattern.toUpperCase()}${RESET}` : null
+
+    // Format compact (cas normal)
+    const singleBody = patternLabel
+      ? `${patternLabel} : [${coloredWords.join(' ')}]`
+      : coloredWords.join(' ')
+    const singleContent = headerBlock + singleBody
+    if (fitsInMessage(`\`\`\`ansi\n${singleContent.trimEnd()}\n\`\`\``)) {
+      return [`\`\`\`ansi\n${singleContent.trimEnd()}\n\`\`\``]
     }
+
+    // Format multi-messages : lignes de 10 mots
+    const rows: string[] = []
+    for (let i = 0; i < coloredWords.length; i += 10) {
+      rows.push(coloredWords.slice(i, i + 10).join(' '))
+    }
+
+    const messages: string[] = []
+    const firstHeader = headerBlock + (patternLabel ? `${patternLabel} :\n` : '')
+    let currentContent = firstHeader + (rows[0] ?? '')
+
+    for (let i = 1; i < rows.length; i++) {
+      const candidate = currentContent + '\n' + rows[i]
+      if (!fitsInMessage(`\`\`\`ansi\n${candidate.trimEnd()}\n\`\`\``)) {
+        messages.push(`\`\`\`ansi\n${currentContent.trimEnd()}\n\`\`\``)
+        currentContent = rows[i] ?? ''
+      } else {
+        currentContent = candidate
+      }
+    }
+
+    if (currentContent.trim()) {
+      messages.push(`\`\`\`ansi\n${currentContent.trimEnd()}\n\`\`\``)
+    }
+
+    return messages
   } catch (error) {
     console.error(
       `[SearchWords] Erreur critique avec le motif "${pattern}":`,

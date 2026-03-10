@@ -6,7 +6,6 @@ export async function addChannelHandler ({
   clientGuard
 }: CommandContext): Promise<CommandResponse> {
   const guard = clientGuard(bot, message.author.id, ['owner'])
-  console.log('OKKK', guard)
 
   if (!guard.success) {
     return {

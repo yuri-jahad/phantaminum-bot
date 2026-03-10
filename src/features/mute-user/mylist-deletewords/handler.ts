@@ -1,18 +1,18 @@
 import type { CommandResponse, CommandContext } from '@shared/command/type'
+import { ANSI_COLORS } from '@shared/utils/text'
 
 export async function deleteWordsHandler({
   args,
   bot,
   message,
   clientGuard
-}: CommandContext): Promise<CommandResponse> {
+}: CommandContext): Promise<CommandResponse | string[]> {
   const guard = clientGuard(bot, message.author.id, ['user'])
 
-  if (!guard.success && guard.msg) {
+  if (!guard.success) {
     return guard
   }
 
-  // Stockage en minuscules
   const wordsToRemove = args.slice(1).map(w => w.trim()).filter(w => w.length > 0)
 
   if (wordsToRemove.length === 0) {
@@ -40,19 +40,26 @@ export async function deleteWordsHandler({
       }
     }
 
-    const notFoundWords = wordsToRemove.filter(w => !deletedWords.includes(w))
-    
-    // Affichage en majuscules via .toUpperCase() sur le join
-    let output = `${deletedWords.length} mot(s) supprimé(s) avec succès :\n${deletedWords.join(', ').toUpperCase()}\n\n`
+    const deletedSet = new Set(deletedWords)
+    const notFoundWords = wordsToRemove.filter(w => !deletedSet.has(w))
+
+    const CYAN   = ANSI_COLORS.cyan
+    const BLUE   = ANSI_COLORS.blue
+    const GREEN  = ANSI_COLORS.green
+    const YELLOW = ANSI_COLORS.yellow
+    const RESET  = '\u001b[0m'
+
+    const deletedLabel = `${GREEN}${deletedWords.length} mot(s) supprimé(s)${RESET}\n`
+    const deletedList  = deletedWords.map(w => `${CYAN}${w.toUpperCase()}${RESET}`).join(' ')
+    let output = `${deletedLabel}${deletedList}`
 
     if (notFoundWords.length > 0) {
-      output += `${notFoundWords.length} mot(s) introuvable(s) dans votre liste :\n${notFoundWords.join(', ').toUpperCase()}\n`
+      const notFoundLabel = `${YELLOW}${notFoundWords.length} mot(s) introuvable(s)${RESET}\n`
+      const notFoundList  = notFoundWords.map(w => `${BLUE}${w.toUpperCase()}${RESET}`).join(' ')
+      output += `\n\n${notFoundLabel}${notFoundList}`
     }
 
-    return {
-      success: true,
-      msg: output.trimEnd()
-    }
+    return [`\`\`\`ansi\n${output.trimEnd()}\n\`\`\``]
   } catch (error) {
     console.error(`[DeleteWords] Erreur lors de la suppression pour l'utilisateur ${message.author.id}:`, error)
     return {

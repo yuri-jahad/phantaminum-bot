@@ -6,9 +6,9 @@ import { COLORS_MESSAGE } from '@shared/utils/text'
 
 const lexicService = new LexicService()
 
-export async function lexicHandler({ 
-  args 
-}: CommandContext): Promise<CommandResponse> {
+export async function lexicHandler({
+  args
+}: CommandContext): Promise<CommandResponse | string[]> {
   const word = args[1]?.toLowerCase().trim()
 
   if (!word) {
@@ -78,10 +78,7 @@ export async function lexicHandler({
       output += `${relationColor}${displayAnt}${moreAnt}${resetColor}`
     }
 
-    return {
-      success: true,
-      msg: output.trimEnd()
-    }
+    return [`\`\`\`ansi\n${output.trimEnd()}\n\`\`\``]
 
   } catch (error) {
     console.error(`[LexicHandler] Erreur critique avec le mot "${word}":`, error)

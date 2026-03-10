@@ -1,11 +1,12 @@
-import type { CommandContext } from '@shared/command/type'
+import type { CommandContext, CommandResponse } from '@shared/command/type'
+import { ANSI_COLORS } from '@shared/utils/text'
 
 export async function unmuteHandler ({
   args,
   bot,
   message,
   clientGuard
-}: CommandContext) {
+}: CommandContext): Promise<CommandResponse | string[]> {
   const guard = clientGuard(bot, message.author.id, ['admin'])
 
   if (!guard.success) {
@@ -30,17 +31,21 @@ export async function unmuteHandler ({
     }
   }
 
+  const MAGENTA = ANSI_COLORS.magenta
+  const CYAN    = ANSI_COLORS.cyan
+  const BLUE    = ANSI_COLORS.blue
+  const GREEN   = ANSI_COLORS.green
+  const RESET   = '\u001b[0m'
+
   if (!targetUser.muted) {
-    return {
-      success: true,
-      msg: `L'utilisateur ${targetUser.username} ne fait actuellement l'objet d'aucune suspension de droits.`
-    }
+    const header = `${MAGENTA}DÉJÀ ACTIF${RESET}\n`
+    const info   = `${BLUE}Utilisateur : ${CYAN}${targetUser.username}${RESET} ${BLUE}| Statut : ${GREEN}ACTIF${RESET}`
+    return [`\`\`\`ansi\n${header}\n${info}\n\`\`\``]
   }
 
   await bot.users.setMuteState(targetId, false)
 
-  return {
-    success: true,
-    msg: `Les droits d'interaction de l'utilisateur ${targetUser.username} ont été rétablis avec succès.`
-  }
+  const header = `${MAGENTA}DROITS RÉTABLIS${RESET}\n`
+  const info   = `${BLUE}Utilisateur : ${CYAN}${targetUser.username}${RESET} ${BLUE}| Statut : ${GREEN}ACTIF${RESET}`
+  return [`\`\`\`ansi\n${header}\n${info}\n\`\`\``]
 }

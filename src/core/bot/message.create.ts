@@ -21,7 +21,7 @@ export const handleMessageCreate = async (
       success: false,
       msg: `Action impossible : ${currentUser.username}, vos droits d'interaction avec le bot ont été suspendus.`
     })
-    await message.reply(formattedMessages[0] || '')
+    if (message.channel.isSendable()) await message.channel.send(formattedMessages[0] || '')
     return
   }
 
@@ -34,14 +34,14 @@ export const handleMessageCreate = async (
     await bot.users.addUser(user)
   }
 
-  if (message.channel.isSendable()) {
-    try {
-      await message.channel.sendTyping()
-    } catch {}
-  }
+  if (!message.channel.isSendable()) return
+
+  try {
+    await message.channel.sendTyping()
+  } catch {}
 
   for (let i = 0; i < commandFnContent.length; i++) {
-    await message.reply(commandFnContent[i] || '')
+    await message.channel.send(commandFnContent[i] || '')
     if (i < commandFnContent.length - 1) {
       await sleep(1000)
     }

@@ -2,7 +2,7 @@ import type { CommandResponse, CommandContext } from '@shared/command/type'
 import { formatUptimeService, startTime } from '@features/uptime/uptime.service'
 import { ANSI_COLORS } from '@shared/utils/text'
 
-export const uptimeHandler = ({ args, bot, message }: CommandContext): CommandResponse => {
+export const uptimeHandler = (_ctx: CommandContext): CommandResponse | string[] => {
   try {
     const uptime = formatUptimeService(startTime)
     const { yellow,  cyan, green } = ANSI_COLORS
@@ -26,10 +26,7 @@ export const uptimeHandler = ({ args, bot, message }: CommandContext): CommandRe
       `ID Processus   : ${yellow}${startTime}${cyan}`
     ].join('\n')
 
-    return {
-      success: true,
-      msg: contentMessage
-    }
+    return [`\`\`\`ansi\n${contentMessage}\u001b[0m\n\`\`\``]
   } catch (error) {
     console.error('[UptimeCommand] Erreur dans le calcul:', error)
 

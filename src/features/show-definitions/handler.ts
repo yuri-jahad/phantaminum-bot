@@ -1,13 +1,11 @@
 import { definitionApiRepo } from '@features/show-definitions/repository'
 import type { DefinitionResult } from '@features/show-definitions/type'
 import type { CommandResponse, CommandContext } from '@shared/command/type'
-import { COLORS_MESSAGE } from '@shared/utils/text'
+import { COLORS_MESSAGE, fitsInMessage } from '@shared/utils/text'
 
-export async function showDefinitionsHandler ({
-  args,
-  bot,
-  message
-}: CommandContext): Promise<CommandResponse> {
+export async function showDefinitionsHandler({
+  args
+}: CommandContext): Promise<CommandResponse | string[]> {
   const word = args[1]
   const rawLimit = args[2] ? parseInt(args[2], 10) : 3
   const limit = isNaN(rawLimit) ? 3 : Math.min(Math.max(rawLimit, 1), 10)
@@ -42,31 +40,50 @@ export async function showDefinitionsHandler ({
     const sourceColor = COLORS_MESSAGE.colors['yellow']
     const defaultColor = COLORS_MESSAGE.colors['cyan']
 
-    let output = `\u001b[1m${definitions.length} ${
+    const header = `\u001b[1m${definitions.length} ${
       definitions.length > 1 ? 'définitions trouvées -' : 'définition trouvée -'
-    } ${
-      displayDefs.length
-    } affichée(s) (${word_details.word.toUpperCase()})\u001b[0m\n\n`
+    } ${displayDefs.length} affichée(s) (${word_details.word.toUpperCase()})\u001b[0m`
 
-    output += displayDefs
-      .map((def, index) => {
-        const text =
-          def.definition.length > 280
-            ? def.definition.substring(0, 280) + '...'
-            : def.definition
+    const formattedDefs = displayDefs.map((def, index) => {
+      const text =
+        def.definition.length > 280
+          ? def.definition.substring(0, 280) + '...'
+          : def.definition
 
-        const source = def.source_name
-          ? ` - ${sourceColor}${def.source_name}${defaultColor}`
-          : ''
+      const source = def.source_name
+        ? ` - ${sourceColor}${def.source_name}${defaultColor}`
+        : ''
 
-        return `${defaultColor}${index + 1}. ${text}${source}`
-      })
-      .join('\n\n')
+      return `${defaultColor}${index + 1}. ${text}${source}`
+    })
 
-    return {
-      success: true,
-      msg: output
+    const fullOutput = header + '\n\n' + formattedDefs.join('\n\n')
+    const ansiMessage = `\`\`\`ansi\n${fullOutput.trimEnd()}\n\`\`\``
+
+    if (fitsInMessage(ansiMessage)) {
+      return [ansiMessage]
     }
+
+    // Chunking par définition si le message est trop long
+    const messages: string[] = []
+    let currentOutput = header + '\n\n'
+
+    for (const def of formattedDefs) {
+      const candidate = currentOutput + def + '\n\n'
+      const candidateMsg = `\`\`\`ansi\n${candidate.trimEnd()}\n\`\`\``
+      if (!fitsInMessage(candidateMsg) && currentOutput !== header + '\n\n') {
+        messages.push(`\`\`\`ansi\n${currentOutput.trimEnd()}\n\`\`\``)
+        currentOutput = def + '\n\n'
+      } else {
+        currentOutput = candidate
+      }
+    }
+
+    if (currentOutput.trim()) {
+      messages.push(`\`\`\`ansi\n${currentOutput.trimEnd()}\n\`\`\``)
+    }
+
+    return messages
   } catch (error) {
     console.error(
       `[ShowDefinitions] Erreur critique avec le mot "${word}":`,

@@ -1,9 +1,11 @@
 import type { CommandResponse } from '@shared/command/type'
 import { searchSyllablesRepository } from '@features/search-syllables/repository'
-import type { CommandContext } from '../../shared/command/type';
+import type { CommandContext } from '../../shared/command/type'
+import { ANSI_COLORS, fitsInMessage } from '@shared/utils/text'
+
 export async function searchSyllablesHandler(
- { args, bot,  message }: CommandContext
-): Promise<CommandResponse> {
+  { args }: CommandContext
+): Promise<CommandResponse | string[]> {
   const [_, arg1, arg2] = args
 
   if (!arg1) {
@@ -48,16 +50,43 @@ export async function searchSyllablesHandler(
       occurrenceCount ? `${occurrenceCount} SYLLABES` : ''
     ].filter(Boolean).join(' - ')
 
-    let output = `${count} ${
-      count > 1 ? 'résultats trouvés -' : 'résultat trouvé -'
-    } ${syllablesArray.length} affiché(s) (${searchContext})\n\n`
-    
-    output += syllablesArray.join(' ').replace(/\s+/g, ' ') + '.'
+    const CYAN = ANSI_COLORS.cyan
+    const BLUE = ANSI_COLORS.blue
+    const RESET = '\u001b[0m'
 
-    return {
-      success: true,
-      msg: output
+    const header = `${BLUE}${count} ${count > 1 ? 'résultats trouvés -' : 'résultat trouvé -'} ${syllablesArray.length} affiché(s) (${searchContext})${RESET}\n\n`
+    const coloredSyllables = syllablesArray.map((s: string) => `${CYAN}${s}${RESET}`)
+
+    // Format compact (cas normal)
+    const singleContent = header + coloredSyllables.join(' ')
+    if (fitsInMessage(`\`\`\`ansi\n${singleContent.trimEnd()}\n\`\`\``)) {
+      return [`\`\`\`ansi\n${singleContent.trimEnd()}\n\`\`\``]
     }
+
+    // Format multi-messages : lignes de 10 syllabes
+    const rows: string[] = []
+    for (let i = 0; i < coloredSyllables.length; i += 10) {
+      rows.push(coloredSyllables.slice(i, i + 10).join(' '))
+    }
+
+    const messages: string[] = []
+    let currentContent = header + (rows[0] ?? '')
+
+    for (let i = 1; i < rows.length; i++) {
+      const candidate = currentContent + '\n' + rows[i]
+      if (!fitsInMessage(`\`\`\`ansi\n${candidate.trimEnd()}\n\`\`\``)) {
+        messages.push(`\`\`\`ansi\n${currentContent.trimEnd()}\n\`\`\``)
+        currentContent = rows[i] ?? ''
+      } else {
+        currentContent = candidate
+      }
+    }
+
+    if (currentContent.trim()) {
+      messages.push(`\`\`\`ansi\n${currentContent.trimEnd()}\n\`\`\``)
+    }
+
+    return messages
   } catch (error) {
     console.error(`[SearchSyllables] Erreur avec args: ${args.slice(1).join(' ')}:`, error)
     return {

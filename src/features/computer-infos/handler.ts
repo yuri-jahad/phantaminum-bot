@@ -2,7 +2,7 @@ import { getSystemInfoService } from '@features/computer-infos/service'
 import type { CommandResponse } from '@shared/command/type'
 import { ANSI_COLORS } from '@shared/utils/text'
 
-export const computerHandler = (args: string[]): CommandResponse => {
+export const computerHandler = (args: string[]): CommandResponse | string[] => {
   try {
     const info = getSystemInfoService()
     const { yellow, cyan } = ANSI_COLORS
@@ -19,10 +19,7 @@ export const computerHandler = (args: string[]): CommandResponse => {
       `Node.js     : ${yellow}${info.nodeVersion}${cyan}`
     ].join('\n')
 
-    return {
-      success: true,
-      msg: contentMessage
-    }
+    return [`\`\`\`ansi\n${contentMessage}\u001b[0m\n\`\`\``]
   } catch (error) {
     console.error('[ComputerCommand] Erreur système:', error)
     return {
