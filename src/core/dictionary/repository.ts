@@ -3,7 +3,7 @@ import type { DictionaryList } from '@core/dictionary/type.js'
 export async function getDictionaryList (): Promise<DictionaryList> {
   try {
     const response = await fetch(
-      'https://mwamed.com/syllabe-boreale/server/api/vocabulary/get-list',
+      'https://mwamed.com/syllabe-boreale/server/api/vocabulary/data/get-list',
       {
         method: 'POST',
         headers: {

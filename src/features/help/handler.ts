@@ -15,12 +15,12 @@ import type { CommandResponse, CommandContext, CommandModel } from '@shared/comm
 const PAGES: { emoji: string; label: string; keys: string[] }[][] = [
   // Page 1 — Linguistique
   [
-    { emoji: '🔤', label: 'LINGUISTIQUE', keys: ['c', 's', 'd', 'pick', 'phon', 'rime', 'vers', 'freq', 'homo'] }
+    { emoji: '🔤', label: 'LINGUISTIQUE', keys: ['c', 's', 'd', 'pick', 'phon', 'rime', 'vers', 'freq', 'homo', 'conjugaison', 'skip'] }
   ],
   // Page 2 — Création & Jeux
   [
     { emoji: '🎤', label: 'CRÉATION',     keys: ['freestyle', 'lexic'] },
-    { emoji: '🎮', label: 'JEUX',         keys: ['dg', 'sg', 'rep', 'rimgame'] }
+    { emoji: '🎮', label: 'JEUX',         keys: ['dg', 'sg', 'skip', 'rep', 'rimgame'] }
   ],
   // Page 3 — Culture & Actu
   [

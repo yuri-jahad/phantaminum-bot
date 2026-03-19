@@ -17,8 +17,12 @@ export interface DefGameSession extends BaseSession {
 
 export interface SylGameSession extends BaseSession {
   type: 'syl'
-  syllable: string
+  syllable:     string
   solutionCount: number
+  round:        number
+  totalRounds:  number
+  queue:        string[]                          // syllabes restantes
+  scores:       Record<string, { username: string; wins: number }>
 }
 
 export type GameSession = DefGameSession | SylGameSession
