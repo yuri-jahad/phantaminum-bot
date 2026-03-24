@@ -1,7 +1,7 @@
 # emma-bot
 
 <p>
-  <img src="src/assets/img/phantaminum.webp" width="400" height="500">
+  <img src="src/assets/img/emma-dark.jpg" width="400" height="500">
 </p>
 
 
