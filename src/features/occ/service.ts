@@ -27,7 +27,7 @@ export const processSyllables = (args: string[]): Map<string, Set<string>> => {
     const len = k.length
     if (len === 2 || len === 3) {
       const occ = occurrences[k] as number
-      const match = hasVal2 ? (occ >= val1 && occ <= val2) : (occ === val1)
+      const match = hasVal2 ? (occ >= val1 * 2 && occ <= val2 * 2) : (occ === val1 * 2)
 
       if (isPick ? match : !match) {
         targetSets[k] = new Set<string>()
