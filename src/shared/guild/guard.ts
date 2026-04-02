@@ -7,5 +7,7 @@ export function guildGuard (message: Message, bot: PhantaminumBot): boolean {
   const user = bot.users.getUser(message.author.id)
   if (user?.role === 'owner') return true
 
-  return bot.guilds.hasChannel(message.guildId, message.channelId)
+  const guild = bot.guilds.guilds.get(message.guildId)
+  if (!guild || guild.channels.size === 0) return true
+  return guild.channels.has(message.channelId)
 }

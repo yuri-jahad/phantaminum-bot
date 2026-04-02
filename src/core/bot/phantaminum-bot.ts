@@ -15,6 +15,7 @@ export class PhantaminumBot {
 
   async initializeBot () {
     await this.users.load()
+    await this.guilds.initializeGuilds()
     await this.quran.initializeCoran()
     await lexiconService.loadDictionary()
     await this.commands.initializeCommands()
